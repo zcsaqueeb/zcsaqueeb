@@ -1,11 +1,14 @@
 <div align="center">
 
 ```
-                                 ______   ______     __   __    ________  __       __
-                                /\__  _\ /\  __ \  /\ "-.\ \  /\   __  \/\ \     /\ \
-                                \/_/\ \/ \ \  __ \ \ \ \-.  \ \ \ \|\  \ \ \____\ \ \
-                                   \ \_\  \ \_\ \_\ \ \_\\"\_\ \ \__\_\_  \ \_____  \ \_\
-                                    \/_/   \/_/\/_/  \/_/ \/_/  \/_/\/_/  \/_____/   \/_/
+                                         _
+                                        | |
+ _______ ___  __ _  __ _ _   _  ___  ___| |__
+|_  / __/ __|/ _` |/ _` | | | |/ _ \/ _ \ '_ \
+ / / (__\__ \ (_| | (_| | |_| |  __/  __/ |_) |
+/___\___|___/\__,_|\__, |\__,_|\___|\___|_.__/
+                      | |
+                      |_|
 ```
 
 ### ⌜ shell: ~/.zcsaqueeb ⌟ &nbsp; <sub>_🖱 these commands are clickable_</sub>
@@ -32,6 +35,71 @@
 ```
 > telegram-bots resilient-systems node-lifecycles
 ```
+</details>
+
+<details>
+<summary><b>$ tree ~/zcsaqueeb -L 2</b> &nbsp; <sub>_click a folder to cd into it_</sub></summary>
+
+```
+zcsaqueeb/
+```
+
+<details>
+<summary><b>telegram-bots/</b></summary>
+
+```
+telegram-bots/
+├── bot.py              # entrypoint, battle-tested
+├── handlers.py         # refined over many deployments
+├── utils.py            # the quiet hero
+├── requirements.txt
+└── tests/
+    └── test_nerves.py  # bots have feelings too
+```
+
+<sub>_click again to cd out_</sub>
+</details>
+
+<details>
+<summary><b>resilient-systems/</b></summary>
+
+```
+resilient-systems/
+├── failover.py         # refuses to die
+├── watchdog.sh         # literally never sleeps
+├── monitoring/
+│   ├── alerts.py
+│   └── on-call_curse.md
+└── README.md           # "it works on my machine"
+```
+
+<sub>_click again to cd out_</sub>
+</details>
+
+<details>
+<summary><b>daily-contributions/</b></summary>
+
+```
+daily-contributions/
+├── .github/
+│   └── workflows/
+│       └── daily.yml   # 14:00 UTC · commits itself
+├── contributions.md    # the green squares diary
+└── (no humans were involved in these commits)
+```
+
+<sub>_click again to cd out_</sub>
+</details>
+
+<details>
+<summary><b>motto.txt</b></summary>
+
+```
+"Build. Debug. Deploy. Repeat."
+# also valid: sudo rm -rf /boring-profiles/
+```
+</details>
+
 </details>
 
 <details>
