@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guest@zcsaqueeb:~</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; background:#0d1117; }
+  body {
+    font-family:"SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at center, #0d1117 0%, #010409 100%);
+    padding:12px;
+  }
+  .crt {
+    width:100%; max-width:880px; height:min(88vh, 640px);
+    background:#0a0e14;
+    border:1px solid #1f2937;
+    border-radius:10px;
+    box-shadow:0 0 40px rgba(88,166,255,.12), 0 0 8px rgba(88,166,255,.25), inset 0 0 60px rgba(0,0,0,.5);
+    display:flex; flex-direction:column; overflow:hidden;
+    position:relative;
+  }
+  .crt::after {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 4px);
+    opacity:.35;
+  }
+  .titlebar {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    background:#161b22; border-bottom:1px solid #1f2937; font-size:13px; color:#8b949e;
+    flex-shrink:0;
+  }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+  .titlebar span.title { flex:1; text-align:center; }
+  .screen {
+    flex:1; overflow-y:auto; padding:16px; color:#58a6ff; font-size:14px; line-height:1.55;
+    scrollbar-width:thin; scrollbar-color:#1f2937 transparent;
+  }
+  .screen .out, .screen .cmdline { white-space:pre-wrap; word-break:break-word; }
+  .out .dim { color:#8b949e; }
+  .out .ok { color:#3fb950; }
+  .out .warn { color:#d29922; }
+  .out .err { color:#f85149; }
+  .out .hl { color:#bc8cff; }
+  .out a { color:#58a6ff; text-decoration:underline; }
+  .cmdline { display:flex; align-items:center; gap:0; }
+  .prompt { color:#3fb950; flex-shrink:0; }
+  .prompt .user { color:#d2a8ff; }
+  #input {
+    flex:1; background:transparent; border:none; outline:none; color:#e6edf3;
+    font:inherit; caret-color:#3fb950; padding-left:8px;
+  }
+  .cursor-hint { color:#8b949e; font-size:12px; padding:6px 16px; background:#0d1117; border-top:1px solid #1f2937; flex-shrink:0; }
+  .bar { color:#3fb950; }
+  .matrix { position:absolute; inset:0; background:rgba(1,4,9,.92); z-index:5; display:none; overflow:hidden; }
+  .matrix.show { display:block; }
+  .matrix canvas { width:100%; height:100%; }
+  .matrix .quit { position:absolute; bottom:12px; left:0; right:0; text-align:center; color:#3fb950; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="crt">
+  <div class="titlebar">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <span class="title">guest@zcsaqueeb: ~ (ssh)</span>
+  </div>
+  <div class="screen" id="screen">
+    <div class="out" id="out"></div>
+    <div class="cmdline">
+      <span class="prompt"><span class="user">guest</span>@zcsaqueeb:<span class="bar">~</span>$</span>
+      <input id="input" autocomplete="off" spellcheck="false" autofocus>
+    </div>
+  </div>
+  <div class="cursor-hint">type <b>help</b> and press Enter — try: whoami · skills · projects · stats · matrix · banner</div>
+  <div class="matrix" id="matrix">
+    <canvas id="mcanvas"></canvas>
+    <div class="quit">wake up... (press any key to exit the matrix)</div>
+  </div>
+</div>
+<script>
+const out = document.getElementById('out');
+const input = document.getElementById('input');
+const screen = document.getElementById('screen');
+const history = []; let hIdx = -1;
+
+const BANNER = String.raw`
+                                 ______   ______     __   __    ________  __       __
+                                /\__  _\ /\  __ \  /\ "-.\ \  /\   __  \/\ \     /\ \
+                                \/_/\ \/ \ \  __ \ \ \ \-.  \ \ \ \|\  \ \ \____\ \ \
+                                   \ \_\  \ \_\ \_\ \ \_\\"\_\ \ \__\_\_  \ \_____  \ \_\
+                                    \/_/   \/_/\/_/  \/_/ \/_/  \/_/\/_/  \/_____/   \/_/`;
+
+const CMDS = {
+  help: () => `available commands:
+  <span class="hl">whoami</span>      who is this guy
+  <span class="hl">skills</span>      tech stack report
+  <span class="hl">projects</span>   what I build
+  <span class="hl">stats</span>       live GitHub stats (fetched right now)
+  <span class="hl">repos</span>       list my public repos (live)
+  <span class="hl">motto</span>       the philosophy
+  <span class="hl">banner</span>      show the banner again
+  <span class="hl">matrix</span>      there is no spoon
+  <span class="hl">sudo</span>        try it
+  <span class="hl">date</span>        current time on my machine
+  <span class="hl">clear</span>       wipe the screen
+  <span class="hl">exit</span>        logout (you will be missed)`,
+  whoami: () => `Saqueeb Begumpure :: CSE Engineer
+<span class="dim">builder of resilient systems, refiner of Telegram bots,
+orchestrator of smooth node lifecycles.</span>`,
+  skills: () => `Python     <span class="ok">██████████</span> 100%
+JavaScript <span class="ok">█████████░</span>  90%
+Node.js    <span class="ok">████████░░</span>  85%
+Linux      <span class="ok">████████░░</span>  85%
+Docker     <span class="ok">███████░░░</span>  75%
+Git        <span class="ok">██████████</span> 100%`,
+  projects: () => `<span class="hl">telegram-bots/</span>       bots refined & battle-tested
+<span class="hl">resilient-systems/</span>  systems that refuse to die
+<span class="hl">daily-contributions/</span> automated commits, zero effort
+<span class="dim">(run 'repos' for the live list)</span>`,
+  motto: () => `"Build. Debug. Deploy. Repeat."
+<span class="dim">also: sudo rm -rf /boring-profiles/</span>`,
+  banner: () => BANNER,
+  date: () => new Date().toString(),
+  sudo: () => `<span class="warn">guest is not in the sudoers file.</span> this incident will be reported. 😏`,
+  exit: () => `logging out... <span class="ok">[OK]</span>
+<span class="dim">connection to zcsaqueeb closed. (refresh to reconnect)</span>`,
+  stats: async () => {
+    try {
+      const r = await fetch('https://api.github.com/users/zcsaqueeb');
+      const d = await r.json();
+      return `live GitHub telemetry <span class="dim">(fetched just now)</span>:
+  <span class="hl">${d.public_repos}</span> public repos
+  <span class="hl">${d.followers}</span> followers
+  on GitHub since: <span class="hl">${new Date(d.created_at).toLocaleDateString('en',{month:'long',year:'numeric'})}</span>
+  <a href="https://github.com/zcsaqueeb" target="_blank">→ open my profile</a>`;
+    } catch { return `<span class="err">network unreachable.</span> even hackers lose wifi sometimes.`; }
+  },
+  repos: async () => {
+    try {
+      const r = await fetch('https://api.github.com/users/zcsaqueeb/repos?sort=updated&per_page=10');
+      const d = await r.json();
+      return d.map(x => `  <a href="${x.html_url}" target="_blank">${x.name}</a> <span class="dim">★${x.stargazers_count} · ${x.language || 'misc'}</span>`).join('\n');
+    } catch { return `<span class="err">network unreachable.</span>`; }
+  }
+};
+
+function print(html) {
+  const d = document.createElement('div');
+  d.className = 'out';
+  d.innerHTML = html;
+  out.appendChild(d);
+  screen.scrollTop = screen.scrollHeight;
+}
+
+async function run(raw) {
+  const cmd = raw.trim().split(/\s+/)[0].toLowerCase();
+  print(`<div class="out"><span class="prompt"><span class="user">guest</span>@zcsaqueeb:<span class="bar">~</span>$</span> ${raw.replace(/</g,'&lt;')}</div>`);
+  if (!cmd) return;
+  if (CMDS[cmd]) { print(await CMDS[cmd]()); }
+  else if (cmd === 'clear') { out.innerHTML = ''; }
+  else if (cmd === 'matrix') { startMatrix(); }
+  else { print(`<span class="err">zsh: command not found: ${cmd.replace(/</g,'&lt;')}</span> <span class="dim">(try 'help')</span>`); }
+}
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const v = input.value; input.value = ''; if (v.trim()) { history.push(v); hIdx = history.length; } run(v); }
+  else if (e.key === 'ArrowUp') { if (hIdx > 0) { hIdx--; input.value = history[hIdx]; } e.preventDefault(); }
+  else if (e.key === 'ArrowDown') { if (hIdx < history.length - 1) { hIdx++; input.value = history[hIdx]; } else { hIdx = history.length; input.value = ''; } e.preventDefault(); }
+});
+
+// matrix easter egg
+let matrixTimer = null;
+function startMatrix() {
+  const m = document.getElementById('matrix');
+  const cv = document.getElementById('mcanvas');
+  m.classList.add('show');
+  const ctx = cv.getContext('2d');
+  cv.width = cv.parentElement.clientWidth; cv.height = cv.parentElement.clientHeight;
+  const cols = Math.floor(cv.width / 14);
+  const drops = Array(cols).fill(0).map(() => Math.random() * -50);
+  const chars = 'ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﬀﬁﬂ011010011010ABCDEF';
+  matrixTimer = setInterval(() => {
+    ctx.fillStyle = 'rgba(1,4,9,.12)'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = '#3fb950'; ctx.font = '14px monospace';
+    drops.forEach((y, i) => {
+      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 14, y * 16);
+      drops[i] = (y * 16 > cv.height && Math.random() > .975) ? 0 : y + 1;
+    });
+  }, 45);
+  const stop = () => { clearInterval(matrixTimer); m.classList.remove('show'); document.removeEventListener('keydown', keystop); input.focus(); };
+  const keystop = e => { if (m.classList.contains('show')) { e.preventDefault(); stop(); } };
+  document.addEventListener('keydown', keystop);
+  m.addEventListener('click', stop);
+}
+
+// boot sequence
+const boot = [
+  ['<span class="dim">establishing secure connection to zcsaqueeb.dev ...</span>', 250],
+  ['<span class="ok">[OK]</span> handshake complete <span class="dim">(AES-256, trust me)</span>', 350],
+  ['<span class="ok">[OK]</span> loading profile kernel v2.0 ...', 300],
+  ['<span class="ok">[OK]</span> mounting /skills /projects /motto', 280],
+  ['<span class="warn">[!!]</span> boring profile detected in history — purging', 350],
+  [BANNER, 0],
+  ['<span class="dim">welcome, guest. this terminal is real — type <span class="hl">help</span> to begin.</span>', 0],
+];
+(async () => {
+  await new Promise(r => setTimeout(r, 300));
+  for (const [line, delay] of boot) { print(line); await new Promise(r => setTimeout(r, delay)); }
+  input.focus();
+})();
+</script>
+</body>
+</html>
