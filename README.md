@@ -3,23 +3,51 @@
 ```
                                  ______   ______     __   __    ________  __       __
                                 /\__  _\ /\  __ \  /\ "-.\ \  /\   __  \/\ \     /\ \
-                                \/_/\ \/ \ \  __ \ \ \ \-.  \ \ \  \|\  \ \ \____\ \ \
+                                \/_/\ \/ \ \  __ \ \ \ \-.  \ \ \ \|\  \ \ \____\ \ \
                                    \ \_\  \ \_\ \_\ \ \_\\"\_\ \ \__\_\_  \ \_____  \ \_\
                                     \/_/   \/_/\/_/  \/_/ \/_/  \/_/\/_/  \/_____/   \/_/
 ```
 
-### ⌜ shell: ~/.zcsaqueeb ⌟
+### ⌜ shell: ~/.zcsaqueeb ⌟ &nbsp; <sub>_🖱 these commands are clickable_</sub>
 
-```console
-$ whoami
+<details>
+<summary><b>$ whoami</b></summary>
+
+```
 > Saqueeb Begumpure :: CSE Engineer
-$ cat motto.txt
+```
+</details>
+
+<details>
+<summary><b>$ cat motto.txt</b></summary>
+
+```
 > "Build. Debug. Deploy. Repeat."
-$ echo $FOCUS
+```
+</details>
+
+<details>
+<summary><b>$ echo $FOCUS</b></summary>
+
+```
 > telegram-bots resilient-systems node-lifecycles
-$ sudo rm -rf /boring-profiles/
+```
+</details>
+
+<details>
+<summary><b>$ sudo rm -rf /boring-profiles/</b></summary>
+
+```
 > [OK] profile rebuilt in hacker mode.
 ```
+</details>
+
+<br>
+
+### ⌜ WANT THE REAL THING? ⌟
+
+<a href="https://zcsaqueeb.github.io/zcsaqueeb/"><b>ssh guest@zcsaqueeb</b></a> → fully interactive terminal, no installs, runs in your browser.
+Type `help` when you get there. There's an easter egg in `matrix`.
 
 **> Stay curious. Stay 0x1337. _**
 
